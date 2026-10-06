@@ -14,8 +14,13 @@ class HunterError(Exception):
     pass
 
 
-def search_recruiters(domain):
-    """Return recruiters at `domain` whose emails Hunter has verified. Costs 1 credit if anything is found."""
+# The Free plan only returns the top 10 matches, so pull_contacts rotates through these weekly
+# to surface different people.
+SEARCH_TITLES = ["recruiter", "university recruiter", "talent acquisition", "technical recruiter", "campus recruiter"]
+
+
+def search_recruiters(domain, job_title="recruiter"):
+    """Return recruiters at `domain` matching `job_title`. Costs 1 credit if anything is found."""
     resp = requests.get(
         DOMAIN_SEARCH_URL,
         headers={"X-API-KEY": config.require("HUNTER_API_KEY")},
@@ -23,7 +28,7 @@ def search_recruiters(domain):
         params={
             "domain": domain,
             "type": "personal",
-            "job_titles": "recruiter",
+            "job_titles": job_title,
             "limit": 10,  # Free plan maximum
         },
         timeout=30,

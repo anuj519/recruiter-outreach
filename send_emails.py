@@ -10,6 +10,7 @@ from email.utils import formataddr
 
 from outreach import config, mailer, templates
 from outreach.google_client import credentials, gmail_service, sheets_service
+from outreach.lock import run_lock
 from outreach.store import Sheet, timestamp
 
 
@@ -117,4 +118,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    with run_lock():
+        main()

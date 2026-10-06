@@ -10,10 +10,12 @@ Hunter searches still cost a credit in dry run; Apollo dry runs only use the fre
 
 import os
 from collections import Counter
+from datetime import datetime, timezone
 
 from outreach import apollo, config, hunter
 from outreach.filters import has_ai_trap
 from outreach.google_client import credentials, sheets_service
+from outreach.lock import run_lock
 from outreach.store import Sheet, timestamp
 
 
@@ -27,8 +29,14 @@ def title_rank(title):
     return 1
 
 
+def this_weeks_title():
+    """Rotate the Hunter title filter weekly; HUNTER_TITLE overrides it."""
+    week = datetime.now(timezone.utc).isocalendar().week
+    return os.getenv("HUNTER_TITLE") or hunter.SEARCH_TITLES[week % len(hunter.SEARCH_TITLES)]
+
+
 def find_with_hunter(domain, want, seen_emails):
-    people = [p for p in hunter.search_recruiters(domain) if p["email"] not in seen_emails]
+    people = [p for p in hunter.search_recruiters(domain, this_weeks_title()) if p["email"] not in seen_emails]
     people.sort(key=lambda p: (p["email_status"] != "verified", title_rank(p["title"])))
     return people[:want]
 
@@ -57,18 +65,18 @@ def find_with_apollo(domain, want, seen_ids, dry):
 def main():
     dry = config.DRY_RUN
     use_hunter = bool(os.getenv("HUNTER_API_KEY"))
-    print(f"Source: {'Hunter' if use_hunter else 'Apollo'}{' (dry run)' if dry else ''}\n")
+    source = f"Hunter, title '{this_weeks_title()}'" if use_hunter else "Apollo"
+    print(f"Source: {source}{' (dry run)' if dry else ''}\n")
 
     sheet = Sheet(sheets_service(credentials()), config.require("SHEET_ID"))
     contacts = sheet.contacts()
     seen_ids = {c["apollo_id"] for c in contacts if c["apollo_id"]}
     seen_emails = {c["email"].lower() for c in contacts if c["email"]}
-    per_company = Counter(c["domain"] for c in contacts if c["status"] != "unverified")
     budget = config.MAX_ENRICH_PER_RUN
 
     for company in sheet.companies():
         domain = company["domain"]
-        want = min(config.MAX_PER_COMPANY - per_company[domain], budget)
+        want = min(config.MAX_PER_COMPANY, budget)  # new people per company per run
         if want <= 0:
             continue
 
@@ -117,4 +125,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    with run_lock():
+        main()
