@@ -4,11 +4,9 @@ Hi {first_name},
 
 {first_line}
 
-I'm a student at the University of Michigan, graduating in 2027. I interned at Etsy this past summer and am currently interning at Amazon. I'm looking for a new grad role and would love to be considered for openings at {company}.
+I'm a student at the University of Michigan, graduating in 2027. I interned at Etsy this past summer and am currently interning at Amazon. I've already applied to {company}'s new grad roles and would love to be considered.
 
 Would you be open to a quick chat, or could you point me to the right person?
 
 Thanks,
 {sender_name}
-
-If you'd rather I not reach out again, just let me know.
