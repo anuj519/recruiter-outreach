@@ -19,11 +19,11 @@ def search_recruiters(domain):
     resp = requests.get(
         DOMAIN_SEARCH_URL,
         headers={"X-API-KEY": config.require("HUNTER_API_KEY")},
+        # The verification_status filter hid valid results in testing, so verification is checked below instead.
         params={
             "domain": domain,
-            "department": "hr",
             "type": "personal",
-            "verification_status": "valid",
+            "job_titles": "recruiter",
             "limit": 10,  # Free plan maximum
         },
         timeout=30,

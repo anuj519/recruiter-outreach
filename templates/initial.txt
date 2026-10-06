@@ -2,11 +2,11 @@ Subject: Interested in Summer 2027 internships at {company}
 
 Hi {first_name},
 
-{first_line}
+I hope you're having a great day!
 
-I'm a student at the University of Michigan, graduating in May 2028. I interned at Etsy this past summer and am currently interning at Amazon. I've already applied to {company}'s Summer 2027 internship roles and would love to be considered.
+For a brief background, my name is Nathan Done, and I'm a Computer Science student at the University of Michigan. I previously interned as a software engineer at Etsy and am currently interning at Amazon. I'm interested in Summer 2027 internship positions at {company}, and I thought it would be a good idea to reach out to hear about your time at the company and soak up some knowledge.
 
-Would you be open to a quick chat, or could you point me to the right person?
+If you have any availability in the coming days, I'd love the opportunity to schedule a brief 15-30 minute call to chat. I understand you may be busy, and I'd be more than happy to work around your availability.
 
-Thanks,
+Best,
 {sender_name}

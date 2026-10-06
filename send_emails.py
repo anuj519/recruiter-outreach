@@ -81,11 +81,7 @@ def handle_follow_ups(outbox, contacts, me):
 def handle_new(outbox, contacts, first_lines):
     approved = [r for r in contacts if r["status"] == "approved"]
     for row in approved[: config.DAILY_NEW_LIMIT]:
-        first_line = first_lines.get(row["domain"], "")
-        if not first_line:
-            print(f"No first_line for {row['domain']} in Companies. Skipping {row['email']}.")
-            continue
-        subject, body = templates.render("initial.txt", row["domain"], **fields(row, first_line))
+        subject, body = templates.render("initial.txt", row["domain"], **fields(row, first_lines.get(row["domain"], "")))
         result = outbox.send(row, subject, body)
         if result:
             outbox.save(

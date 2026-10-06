@@ -17,9 +17,19 @@ from outreach.google_client import credentials, sheets_service
 from outreach.store import Sheet, timestamp
 
 
+def title_rank(title):
+    """Front-line and university recruiters answer cold email more than recruiting leadership."""
+    title = title.lower()
+    if any(w in title for w in ("university", "campus", "early career", "emerging talent")):
+        return 0
+    if any(w in title for w in ("director", "head", "vp", "vice president", "chief", "manager", "operations")):
+        return 2
+    return 1
+
+
 def find_with_hunter(domain, want, seen_emails):
     people = [p for p in hunter.search_recruiters(domain) if p["email"] not in seen_emails]
-    people.sort(key=lambda p: p["email_status"] != "verified")  # verified first
+    people.sort(key=lambda p: (p["email_status"] != "verified", title_rank(p["title"])))
     return people[:want]
 
 
