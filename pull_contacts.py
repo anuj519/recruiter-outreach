@@ -1,24 +1,56 @@
-"""Weekly job: find recruiters at active companies, enrich a few, add verified ones as status "new".
+"""Weekly job: find recruiters at active companies and add verified ones to the sheet.
 
-Needs a paid Apollo plan (the Free plan has no API access). On the Free plan use import_contacts.py.
+Uses Hunter.io when HUNTER_API_KEY is set (works on Hunter's Free plan), otherwise Apollo
+(needs a paid Apollo plan). Verified emails are added as "new", or "approved" when
+AUTO_APPROVE=true so the send job emails them without a manual review.
 
-With DRY_RUN on (the default) it runs only the free search and lists who would be enriched.
-No credits are spent and the sheet is not changed.
+With DRY_RUN on (the default) it shows who would be added and leaves the sheet unchanged.
+Hunter searches still cost a credit in dry run; Apollo dry runs only use the free search.
 """
 
+import os
 from collections import Counter
 
-from outreach import apollo, config
+from outreach import apollo, config, hunter
 from outreach.filters import has_ai_trap
 from outreach.google_client import credentials, sheets_service
 from outreach.store import Sheet, timestamp
 
 
+def find_with_hunter(domain, want, seen_emails):
+    people = [p for p in hunter.search_recruiters(domain) if p["email"] not in seen_emails]
+    people.sort(key=lambda p: p["email_status"] != "verified")  # verified first
+    return people[:want]
+
+
+def find_with_apollo(domain, want, seen_ids, dry):
+    found = apollo.search_people(domain, config.RECRUITER_TITLES, limit=want, exclude_ids=seen_ids)
+    if dry:
+        return [{"first_name": p["first_name"], "last_name": p.get("last_name_obfuscated", ""),
+                 "title": p.get("title") or "", "email": "", "email_status": "(not enriched in dry run)"} for p in found]
+    people = []
+    for m in apollo.enrich([p["id"] for p in found]):
+        headline = m.get("headline") or ""
+        people.append({
+            "first_name": m.get("first_name") or "",
+            "last_name": m.get("last_name") or "",
+            "title": m.get("title") or "",
+            "email": (m.get("email") or "").lower(),
+            "email_status": m.get("email_status") or "",
+            "linkedin_url": m.get("linkedin_url") or "",
+            "apollo_id": m["id"],
+            "notes": f"AI warning in headline: {headline}" if has_ai_trap(headline) else "",
+        })
+    return people
+
+
 def main():
     dry = config.DRY_RUN
+    use_hunter = bool(os.getenv("HUNTER_API_KEY"))
+    print(f"Source: {'Hunter' if use_hunter else 'Apollo'}{' (dry run)' if dry else ''}\n")
+
     sheet = Sheet(sheets_service(credentials()), config.require("SHEET_ID"))
     contacts = sheet.contacts()
-
     seen_ids = {c["apollo_id"] for c in contacts if c["apollo_id"]}
     seen_emails = {c["email"].lower() for c in contacts if c["email"]}
     per_company = Counter(c["domain"] for c in contacts if c["status"] != "unverified")
@@ -30,54 +62,48 @@ def main():
         if want <= 0:
             continue
 
-        people = apollo.search_people(domain, config.RECRUITER_TITLES, limit=want, exclude_ids=seen_ids)
-        print(f"{domain}: {len(people)} to enrich")
-        for p in people:
-            print(f"  {p['first_name']} {p.get('last_name_obfuscated', '')} | {p.get('title')}")
+        if use_hunter:
+            people = find_with_hunter(domain, want, seen_emails)
+        else:
+            people = find_with_apollo(domain, want, seen_ids, dry)
         budget -= len(people)
-        if dry or not people:
-            continue
 
         rows = []
-        for m in apollo.enrich([p["id"] for p in people]):
-            email = (m.get("email") or "").lower()
+        for p in people:
+            email = p["email"]
             if email and email in seen_emails:
-                print(f"  duplicate email, skipped: {m.get('name')}")
                 continue
-            verified = bool(email) and m.get("email_status") == "verified"
-            headline = m.get("headline") or ""
-            if has_ai_trap(headline):
-                status, notes = "skip", f"AI warning in headline: {headline}"
+            if p.get("notes"):
+                status = "skip"
+            elif email and p["email_status"] == "verified":
+                status = "approved" if config.AUTO_APPROVE else "new"
             else:
-                status, notes = ("new" if verified else "unverified"), ""
+                status = "unverified"
             rows.append({
+                **p,
                 "company": company["company"] or domain,
                 "domain": domain,
-                "first_name": m.get("first_name") or "",
-                "last_name": m.get("last_name") or "",
-                "title": m.get("title") or "",
-                "email": email,
-                "email_status": m.get("email_status") or "",
-                "linkedin_url": m.get("linkedin_url") or "",
-                "apollo_id": m["id"],
                 "status": status,
                 "added_at": timestamp(),
                 "follow_up_count": 0,
-                "notes": notes,
             })
-            seen_ids.add(m["id"])
             if email:
                 seen_emails.add(email)
-        sheet.add_contacts(rows)
-        counts = Counter(r["status"] for r in rows)
-        print(f"  added {counts['new']} verified, {counts['unverified']} unverified, {counts['skip']} skipped for AI warnings")
+            if p.get("apollo_id"):
+                seen_ids.add(p["apollo_id"])
+
+        print(f"{domain}: {len(rows)} found")
+        for r in rows:
+            print(f"  {r['status']:<10} {r['first_name']} {r['last_name']} | {r['title']}")
+        if rows and not dry:
+            sheet.add_contacts(rows)
 
         if budget <= 0:
-            print("Enrichment budget for this run used up.")
+            print("Per-run contact budget used up.")
             break
 
     if dry:
-        print("\nDry run: no credits spent, sheet unchanged. Set DRY_RUN=false to enrich.")
+        print("\nDry run: sheet unchanged. Set DRY_RUN=false to add these contacts.")
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ Everything runs in **dry-run mode by default**. Nothing is sent and no Apollo cr
 | Script | When | What it does |
 |---|---|---|
 | `import_contacts.py` | by hand | **Apollo Free plan.** Loads a CSV exported from Apollo's website into the sheet. Verified emails are added as `new`. |
-| `pull_contacts.py` | weekly | **Paid Apollo plan only.** Searches through the API, enriches up to `MAX_ENRICH_PER_RUN` people, and adds verified emails as `new`. |
+| `pull_contacts.py` | weekly | Finds recruiters automatically. Uses **Hunter.io** when `HUNTER_API_KEY` is set; its free plan includes 50 credits a month, at 1 per company search. Otherwise it uses Apollo, which needs a paid plan. Verified emails are added as `new`, or as `approved` if `AUTO_APPROVE=true`. |
 | `send_emails.py` | weekdays | Checks every contacted thread for replies, sends follow-ups that are due, then sends first emails to `approved` contacts |
 
 The Google Sheet has two tabs.

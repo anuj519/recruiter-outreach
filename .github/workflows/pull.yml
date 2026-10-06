@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: Search only, spend no Apollo credits
+        description: Preview only, leave the sheet unchanged
         type: boolean
         default: true
   # Enable once manual runs look right. Mondays 13:00 UTC.
@@ -30,6 +30,8 @@ jobs:
         env:
           DRY_RUN: ${{ github.event_name == 'schedule' && 'false' || (inputs.dry_run && 'true' || 'false') }}
           APOLLO_API_KEY: ${{ secrets.APOLLO_API_KEY }}
+          HUNTER_API_KEY: ${{ secrets.HUNTER_API_KEY }}
+          AUTO_APPROVE: ${{ vars.AUTO_APPROVE }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
