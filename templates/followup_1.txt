@@ -1,6 +1,6 @@
 Hi {first_name},
 
-Bumping this in case it got buried. I'm still very interested in TODO roles at {company} and would appreciate any pointers.
+Bumping this in case it got buried. I'm still very interested in a Summer 2027 internship at {company} and would appreciate any pointers.
 
 Thanks,
 {sender_name}
