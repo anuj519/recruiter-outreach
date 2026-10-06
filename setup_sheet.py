@@ -7,6 +7,14 @@ from dotenv import set_key
 from outreach.google_client import credentials, sheets_service
 from outreach.store import COMPANIES, COMPANY_COLUMNS, CONTACT_COLUMNS, CONTACTS
 
+# Target companies. first_line (the personalized opener) is filled in by hand in the sheet.
+STARTING_COMPANIES = [
+    ["datadoghq.com", "Datadog", "", "yes"],
+    ["doordash.com", "DoorDash", "", "yes"],
+    ["plaid.com", "Plaid", "", "yes"],
+    ["bloomberg.com", "Bloomberg", "", "yes"],
+]
+
 if os.getenv("SHEET_ID"):
     raise SystemExit("SHEET_ID is already set in .env. Clear it first to create a new sheet.")
 
@@ -27,7 +35,7 @@ service.spreadsheets().values().batchUpdate(
     body={
         "valueInputOption": "RAW",
         "data": [
-            {"range": f"{COMPANIES}!A1", "values": [COMPANY_COLUMNS]},
+            {"range": f"{COMPANIES}!A1", "values": [COMPANY_COLUMNS, *STARTING_COMPANIES]},
             {"range": f"{CONTACTS}!A1", "values": [CONTACT_COLUMNS]},
         ],
     },

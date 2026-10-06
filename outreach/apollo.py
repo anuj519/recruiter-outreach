@@ -25,6 +25,8 @@ def _post(path, params=None, json=None):
         if resp.status_code == 429 and attempt < 2:
             time.sleep(30 * (attempt + 1))
             continue
+        if resp.status_code == 401:
+            raise ApolloError("Apollo rejected APOLLO_API_KEY as invalid. Check the key in .env.")
         if resp.status_code == 403:
             raise ApolloError(f"{path} returned 403. The key may lack this endpoint's scope, or the plan may lack API access.")
         if not resp.ok:
