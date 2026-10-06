@@ -8,7 +8,8 @@ Everything runs in **dry-run mode by default**. Nothing is sent and no Apollo cr
 
 | Script | When | What it does |
 |---|---|---|
-| `pull_contacts.py` | weekly | Free Apollo search, then enriches up to `MAX_ENRICH_PER_RUN` people and adds verified emails to the sheet as `new` |
+| `import_contacts.py` | by hand | **Apollo Free plan.** Loads a CSV exported from Apollo's website into the sheet. Verified emails are added as `new`. |
+| `pull_contacts.py` | weekly | **Paid Apollo plan only.** Searches through the API, enriches up to `MAX_ENRICH_PER_RUN` people, and adds verified emails as `new`. |
 | `send_emails.py` | weekdays | Checks every contacted thread for replies, sends follow-ups that are due, then sends first emails to `approved` contacts |
 
 The Google Sheet has two tabs.
@@ -34,12 +35,15 @@ Status flow: `new` → `approved` → `contacted` → `replied` / `opted_out` / 
 4. `python auth_google.py` opens a browser for consent and saves the refresh token to `.env`.
 5. `python setup_sheet.py` creates the spreadsheet and saves `SHEET_ID` to `.env`.
 6. Add companies to the Companies tab, then fill in every `TODO` in `templates/`. Live sends refuse to run while any `TODO` remains.
-7. Try it locally:
+7. Find recruiters (Free plan):
+   - In Apollo's website, go to People and filter by company (Datadog, DoorDash, Plaid, Bloomberg) and by titles like Recruiter, University Recruiter or Talent Acquisition.
+   - Select a few people, click "Access email" to reveal their addresses (this uses your free credits), then export them as CSV.
    ```zsh
-   python pull_contacts.py                  # dry run: shows who would be enriched
-   DRY_RUN=false python pull_contacts.py    # spends credits, fills the sheet
-   python send_emails.py                    # dry run: prints every email
+   python import_contacts.py ~/Downloads/apollo-contacts-export.csv          # preview
+   python import_contacts.py ~/Downloads/apollo-contacts-export.csv --write  # add to sheet
    ```
+   A hand-made CSV works too. It needs `first_name,last_name,title,company,email,email_status` columns.
+8. Preview the emails with `python send_emails.py`. This is a dry run that prints every email.
    For the first real send, approve only a contact whose address is your own.
 
 ## GitHub Actions

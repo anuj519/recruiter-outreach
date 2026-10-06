@@ -1,31 +1,17 @@
 """Weekly job: find recruiters at active companies, enrich a few, add verified ones as status "new".
 
+Needs a paid Apollo plan (the Free plan has no API access). On the Free plan use import_contacts.py.
+
 With DRY_RUN on (the default) it runs only the free search and lists who would be enriched.
 No credits are spent and the sheet is not changed.
 """
 
-import re
 from collections import Counter
 
 from outreach import apollo, config
+from outreach.filters import has_ai_trap
 from outreach.google_client import credentials, sheets_service
 from outreach.store import Sheet, timestamp
-
-# Phrases recruiters put in their LinkedIn headline to catch AI-written outreach.
-# Kept narrow on purpose: plain mentions of "LLM" or "AI" are common in tech recruiters' headlines.
-AI_TRAP_PHRASES = (
-    "if you are an ai", "if you're an ai", "if you are a bot", "if you're a bot",
-    "if you are an llm", "if you're an llm", "if you are a language model", "if you're a language model",
-    "if you are chatgpt", "if you're chatgpt", "ignore previous instructions", "ignore all previous",
-    "ignore prior instructions", "ignore your instructions", "disregard previous instructions",
-)
-
-
-AI_TRAP_PATTERN = re.compile(r"\b(" + "|".join(re.escape(p) for p in AI_TRAP_PHRASES) + r")\b")
-
-
-def has_ai_trap(text):
-    return bool(AI_TRAP_PATTERN.search(text.lower().replace("’", "'")))
 
 
 def main():
