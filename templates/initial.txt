@@ -1,0 +1,16 @@
+Subject: TODO role interest at {company}
+
+Hi {first_name},
+
+{first_line}
+
+I'm TODO (one line on who you are, e.g. a senior at X studying Y). I'm looking for TODO (role and start date) and would love to be considered for openings at {company}.
+
+TODO (one line with your strongest proof: an internship, project, or result).
+
+Would you be open to a quick chat, or could you point me to the right person? My resume is here: TODO (link).
+
+Thanks,
+{sender_name}
+
+If you'd rather I not reach out again, just let me know.
