@@ -7,7 +7,7 @@ A company can override any template with templates/<domain>/<name>, e.g. templat
 from pathlib import Path
 
 TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates"
-NAMES = ["initial.txt", "followup_1.txt", "followup_2.txt"]
+NAMES = ["initial.txt", "followup_1.txt"]
 
 
 def _path(name, domain=""):

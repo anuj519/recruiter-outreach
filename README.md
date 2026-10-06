@@ -1,6 +1,6 @@
 # Recruiter Outreach
 
-Finds recruiters at target companies with Apollo, sends personalized cold emails from Gmail, and sends at most two follow-ups. Follow-ups stop as soon as anyone replies.
+Finds recruiters at target companies with Apollo, sends personalized cold emails from Gmail, and sends one follow-up. Follow-ups stop as soon as anyone replies.
 
 Everything runs in **dry-run mode by default**. Nothing is sent and no Apollo credits are spent until `DRY_RUN=false`.
 
@@ -58,7 +58,7 @@ Both workflows are manual-only (Actions tab → Run workflow, with a dry-run che
 ## Guardrails
 
 - At most 20 new emails per run (`DAILY_NEW_LIMIT`), sent about 30 seconds apart
-- At most 2 follow-ups, 7 days apart. Contacts are marked `done` 7 days after the last follow-up.
+- One follow-up, 7 days after the first email. Contacts are marked `done` 7 days after the follow-up.
 - Any human reply stops all emails to that person. Replies containing opt-out phrases are marked `opted_out`. Out-of-office auto-replies are ignored.
 - Recruiters whose LinkedIn headline (from Apollo) contains an AI trap like "if you're an AI…" are added as `skip`, with the reason in `notes`. This doesn't see the LinkedIn About section, so glance at `linkedin_url` before approving.
 - Rows are never deleted, so a person or email already in the sheet is never re-added or re-enriched.

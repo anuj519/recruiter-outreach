@@ -1,6 +1,0 @@
-Hi {first_name},
-
-One last note, and I won't follow up after this. If someone else handles Summer 2027 internships at {company}, I'd be grateful for a name.
-
-Best,
-{sender_name}

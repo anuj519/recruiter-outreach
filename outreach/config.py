@@ -20,7 +20,7 @@ def require(name):
 DRY_RUN = os.getenv("DRY_RUN", "true").strip().lower() != "false"
 
 DAILY_NEW_LIMIT = _int("DAILY_NEW_LIMIT", 20)
-MAX_FOLLOW_UPS = min(_int("MAX_FOLLOW_UPS", 2), 2)  # only two follow-up templates exist
+MAX_FOLLOW_UPS = min(_int("MAX_FOLLOW_UPS", 1), 1)  # one follow-up, then stop
 FOLLOW_UP_DAYS = _int("FOLLOW_UP_DAYS", 7)
 SEND_DELAY_SECONDS = _int("SEND_DELAY_SECONDS", 30)
 
