@@ -70,7 +70,7 @@ def handle_follow_ups(outbox, contacts, me):
             outbox.save(row, status="done")
             continue
 
-        _, body = templates.render(f"followup_{count + 1}.txt", **fields(row))
+        _, body = templates.render(f"followup_{count + 1}.txt", row["domain"], **fields(row))
         outbox.send(
             row, f"Re: {row['subject']}", body,
             thread_id=row["thread_id"], in_reply_to=state.last_message_id, references=state.references,
@@ -85,7 +85,7 @@ def handle_new(outbox, contacts, first_lines):
         if not first_line:
             print(f"No first_line for {row['domain']} in Companies. Skipping {row['email']}.")
             continue
-        subject, body = templates.render("initial.txt", **fields(row, first_line))
+        subject, body = templates.render("initial.txt", row["domain"], **fields(row, first_line))
         result = outbox.send(row, subject, body)
         if result:
             outbox.save(
