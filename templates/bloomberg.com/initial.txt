@@ -1,4 +1,4 @@
-Subject: Michigan student interested in new grad roles at {company}
+Subject: Interested in new grad roles at {company}
 
 Hi {first_name},
 

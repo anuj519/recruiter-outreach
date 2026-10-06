@@ -1,4 +1,4 @@
-Subject: Michigan student interested in a Summer 2027 internship at {company}
+Subject: Interested in Summer 2027 internships at {company}
 
 Hi {first_name},
 
