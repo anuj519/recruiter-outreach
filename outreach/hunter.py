@@ -7,7 +7,7 @@ import requests
 from outreach import config
 
 DOMAIN_SEARCH_URL = "https://api.hunter.io/v2/domain-search"
-RECRUITER_WORDS = ("recruit", "talent", "sourc", "university", "campus", "hiring")
+RECRUITER_WORDS = ("recruit", "talent", "sourcer", "sourcing", "university", "campus", "hiring")
 
 
 class HunterError(Exception):
