@@ -56,4 +56,5 @@ Both workflows are manual-only (Actions tab → Run workflow, with a dry-run che
 - At most 20 new emails per run (`DAILY_NEW_LIMIT`), sent about 30 seconds apart
 - At most 2 follow-ups, 7 days apart. Contacts are marked `done` 7 days after the last follow-up.
 - Any human reply stops all emails to that person. Replies containing opt-out phrases are marked `opted_out`. Out-of-office auto-replies are ignored.
+- Recruiters whose LinkedIn headline (from Apollo) contains an AI trap like "if you're an AI…" are added as `skip`, with the reason in `notes`. This doesn't see the LinkedIn About section, so glance at `linkedin_url` before approving.
 - Rows are never deleted, so a person or email already in the sheet is never re-added or re-enriched.
