@@ -9,6 +9,7 @@ Hunter searches still cost a credit in dry run; Apollo dry runs only use the fre
 """
 
 import os
+import sys
 from collections import Counter
 from datetime import datetime, timezone
 
@@ -74,7 +75,10 @@ def main():
     seen_emails = {c["email"].lower() for c in contacts if c["email"]}
     budget = config.MAX_ENRICH_PER_RUN
 
+    only = {d.lower() for d in sys.argv[1:]}  # optional: python pull_contacts.py affirm.com ...
     for company in sheet.companies():
+        if only and company["domain"] not in only:
+            continue
         domain = company["domain"]
         want = min(config.MAX_PER_COMPANY, budget)  # new people per company per run
         if want <= 0:
