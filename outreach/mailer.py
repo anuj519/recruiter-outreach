@@ -22,7 +22,7 @@ class ThreadState:
 
 
 def my_address(gmail):
-    return gmail.users().getProfile(userId="me").execute()["emailAddress"]
+    return gmail.users().getProfile(userId="me").execute(num_retries=3)["emailAddress"]
 
 
 def send(gmail, *, sender, to, subject, body, thread_id=None, in_reply_to=None, references=None):
@@ -47,7 +47,7 @@ def check_thread(gmail, thread_id, me):
         id=thread_id,
         format="metadata",
         metadataHeaders=["From", "Message-ID", "References", "Auto-Submitted"],
-    ).execute()
+    ).execute(num_retries=3)
 
     status, last_id, refs = "waiting", "", ""
     for message in thread.get("messages", []):

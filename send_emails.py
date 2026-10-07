@@ -57,7 +57,11 @@ def handle_follow_ups(outbox, contacts, me):
             print(f"Row {row['_row']} is 'contacted' but has no thread_id. Skipping.")
             continue
 
-        state = mailer.check_thread(outbox.gmail, row["thread_id"], me)
+        try:
+            state = mailer.check_thread(outbox.gmail, row["thread_id"], me)
+        except Exception as e:
+            print(f"Couldn't check {row['email']}'s thread ({e.__class__.__name__}). Will retry next run.")
+            continue
         if state.status != "waiting":
             print(f"{row['email']}: {state.status}, no more emails")
             outbox.save(row, status=state.status)
@@ -72,10 +76,16 @@ def handle_follow_ups(outbox, contacts, me):
             continue
 
         _, body = templates.render(f"followup_{count + 1}.txt", row["domain"], **fields(row))
-        outbox.send(
-            row, f"Re: {row['subject']}", body,
-            thread_id=row["thread_id"], in_reply_to=state.last_message_id, references=state.references,
-        )
+        try:
+            outbox.send(
+                row, f"Re: {row['subject']}", body,
+                thread_id=row["thread_id"], in_reply_to=state.last_message_id, references=state.references,
+            )
+        except Exception as e:
+            # Counted as used rather than retried, so a send that actually went through is never duplicated.
+            print(f"    follow-up failed ({e.__class__.__name__}); not retrying.")
+            outbox.save(row, follow_up_count=count + 1, last_contacted=timestamp(), notes=f"Follow-up send failed: {e.__class__.__name__}")
+            continue
         outbox.save(row, follow_up_count=count + 1, last_contacted=timestamp())
 
 
@@ -83,7 +93,13 @@ def handle_new(outbox, contacts, first_lines):
     approved = [r for r in contacts if r["status"] == "approved"]
     for row in approved[: config.DAILY_NEW_LIMIT]:
         subject, body = templates.render("initial.txt", row["domain"], **fields(row, first_lines.get(row["domain"], "")))
-        result = outbox.send(row, subject, body)
+        try:
+            result = outbox.send(row, subject, body)
+        except Exception as e:
+            # Not retried: a timed-out send may have gone through. Check Sent before re-approving.
+            print(f"    send failed ({e.__class__.__name__}); marked send_error. Check Gmail Sent before re-approving.")
+            outbox.save(row, status="send_error", notes=f"Send failed {timestamp()}: {e.__class__.__name__}")
+            continue
         if result:
             outbox.save(
                 row, status="contacted", thread_id=result["threadId"], subject=subject,

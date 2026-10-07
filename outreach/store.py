@@ -34,7 +34,7 @@ class Sheet:
         self.sheet_id = sheet_id
 
     def _read(self, tab, expected_columns):
-        values = self.values.get(spreadsheetId=self.sheet_id, range=f"{tab}!A1:Z").execute().get("values", [])
+        values = self.values.get(spreadsheetId=self.sheet_id, range=f"{tab}!A1:Z").execute(num_retries=3).get("values", [])
         if not values:
             raise SystemExit(f"The {tab} tab is empty. Run setup_sheet.py first.")
         header = values[0]
@@ -76,4 +76,4 @@ class Sheet:
             range=f"{CONTACTS}!A{row['_row']}",
             valueInputOption="RAW",
             body={"values": [[row.get(col, "") for col in CONTACT_COLUMNS]]},
-        ).execute()
+        ).execute(num_retries=3)
