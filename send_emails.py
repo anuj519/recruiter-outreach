@@ -14,20 +14,46 @@ from outreach.lock import run_lock
 from outreach.store import Sheet, timestamp
 
 
+class Mailbox:
+    """One sending account. Replies can only be checked in the mailbox that sent the email."""
+
+    def __init__(self, account, creds=None):
+        self.account = account
+        self.creds = creds or credentials(account)
+        self.gmail = gmail_service(self.creds)
+        self.me = mailer.my_address(self.gmail)
+        self.sender = formataddr((config.require("SENDER_NAME"), self.me))
+
+
 class Outbox:
-    def __init__(self, gmail, sheet, sender, dry, creds=None):
-        self.gmail, self.sheet, self.sender, self.dry, self.creds = gmail, sheet, sender, dry, creds
+    def __init__(self, sheet, dry, mailboxes=None):
+        self.sheet, self.dry = sheet, dry
+        self.mailboxes = mailboxes or {}
         self.sent = 0
 
+    def mailbox(self, row):
+        """The contact's sending account (blank = gmail). Raises if that account isn't set up."""
+        account = row.get("account") or "gmail"
+        if account not in self.mailboxes:
+            try:
+                self.mailboxes[account] = Mailbox(account)
+            except (SystemExit, Exception) as e:
+                self.mailboxes[account] = e  # remembered so each row doesn't retry the login
+        mb = self.mailboxes[account]
+        if isinstance(mb, BaseException):
+            raise RuntimeError(f"account '{account}' isn't connected ({mb}). Run: python auth_google.py {account}")
+        return mb
+
     def send(self, row, subject, body, **threading):
-        print(f"\n--> {row['first_name']} {row['last_name']} <{row['email']}> at {row['company']}")
+        mb = self.mailbox(row)
+        print(f"\n--> {row['first_name']} {row['last_name']} <{row['email']}> at {row['company']} (from {mb.me})")
         if self.dry:
             print(f"Subject: {subject}\n\n{body}")
             return None
         if self.sent:
             time.sleep(config.SEND_DELAY_SECONDS * random.uniform(0.75, 1.25))
-        http = fresh_http(self.creds) if self.creds else None
-        result = mailer.send(self.gmail, sender=self.sender, to=row["email"], subject=subject, body=body, http=http, **threading)
+        http = fresh_http(mb.creds) if mb.creds else None
+        result = mailer.send(mb.gmail, sender=mb.sender, to=row["email"], subject=subject, body=body, http=http, **threading)
         self.sent += 1
         print("    sent")
         return result
@@ -49,7 +75,7 @@ def fields(row, first_line=""):
     }
 
 
-def handle_follow_ups(outbox, contacts, me):
+def handle_follow_ups(outbox, contacts):
     now = datetime.now(timezone.utc)
     for row in contacts:
         if row["status"] != "contacted":
@@ -59,9 +85,10 @@ def handle_follow_ups(outbox, contacts, me):
             continue
 
         try:
-            state = mailer.check_thread(outbox.gmail, row["thread_id"], me)
+            mb = outbox.mailbox(row)
+            state = mailer.check_thread(mb.gmail, row["thread_id"], mb.me)
         except Exception as e:
-            print(f"Couldn't check {row['email']}'s thread ({e.__class__.__name__}). Will retry next run.")
+            print(f"Couldn't check {row['email']}'s thread ({e}). Will retry next run.")
             continue
         if state.status != "waiting":
             print(f"{row['email']}: {state.status}, no more emails")
@@ -93,6 +120,11 @@ def handle_follow_ups(outbox, contacts, me):
 def handle_new(outbox, contacts, first_lines):
     approved = [r for r in contacts if r["status"] == "approved"]
     for row in approved[: config.DAILY_NEW_LIMIT]:
+        try:
+            outbox.mailbox(row)
+        except RuntimeError as e:
+            print(f"Skipping {row['email']}: {e}")
+            continue
         subject, body = templates.render("initial.txt", row["domain"], **fields(row, first_lines.get(row["domain"], "")))
         try:
             result = outbox.send(row, subject, body)
@@ -118,17 +150,15 @@ def main():
             raise SystemExit(f"Templates still contain TODO: {', '.join(unfinished)}")
         print(f"Warning: templates still contain TODO: {', '.join(unfinished)}\n")
 
-    creds = credentials()
-    gmail = gmail_service(creds)
-    sheet = Sheet(sheets_service(creds), config.require("SHEET_ID"))
-    me = mailer.my_address(gmail)
-    outbox = Outbox(gmail, sheet, formataddr((config.require("SENDER_NAME"), me)), dry, creds)
+    gmail = Mailbox("gmail")  # also owns the sheet
+    sheet = Sheet(sheets_service(gmail.creds), config.require("SHEET_ID"))
+    outbox = Outbox(sheet, dry, {"gmail": gmail})
 
     contacts = sheet.contacts()
     first_lines = {c["domain"]: c["first_line"] for c in sheet.companies()}
 
     # Replies are checked before anything is sent.
-    handle_follow_ups(outbox, contacts, me)
+    handle_follow_ups(outbox, contacts)
     handle_new(outbox, contacts, first_lines)
 
     print(f"\n{'Dry run, nothing sent.' if dry else f'Sent {outbox.sent} emails.'}")

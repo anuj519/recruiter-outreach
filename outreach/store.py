@@ -16,6 +16,7 @@ CONTACT_COLUMNS = [
     "company", "domain", "first_name", "last_name", "title", "email", "email_status",
     "linkedin_url", "apollo_id", "status", "added_at", "last_contacted",
     "follow_up_count", "thread_id", "subject", "notes",
+    "account",  # sending account: blank = gmail, or "umich"
 ]
 
 

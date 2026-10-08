@@ -1,10 +1,20 @@
-"""One-time local OAuth consent. Saves the refresh token into .env without printing it."""
+"""One-time local OAuth consent. Saves the refresh token into .env without printing it.
+
+    python auth_google.py          # your Gmail (also owns the sheet)
+    python auth_google.py umich    # your umich account, for sending only
+"""
+
+import sys
 
 from dotenv import set_key
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 from outreach import config
-from outreach.google_client import SCOPES, TOKEN_URI
+from outreach.google_client import ACCOUNTS, TOKEN_URI, gmail_service, scopes_for
+
+account = sys.argv[1] if len(sys.argv) > 1 else "gmail"
+if account not in ACCOUNTS:
+    raise SystemExit(f"Unknown account '{account}'. Use one of: {', '.join(ACCOUNTS)}")
 
 client_config = {
     "installed": {
@@ -16,10 +26,12 @@ client_config = {
     }
 }
 
-flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
+print(f"Sign in with your {account} account in the browser window.")
+flow = InstalledAppFlow.from_client_config(client_config, scopes_for(account))
 creds = flow.run_local_server(port=0, access_type="offline", prompt="consent")
 if not creds.refresh_token:
     raise SystemExit("Google did not return a refresh token. Remove the app's access at myaccount.google.com/permissions and retry.")
 
-set_key(".env", "GOOGLE_REFRESH_TOKEN", creds.refresh_token)
-print("Saved GOOGLE_REFRESH_TOKEN to .env")
+address = gmail_service(creds).users().getProfile(userId="me").execute()["emailAddress"]
+set_key(".env", ACCOUNTS[account], creds.refresh_token)
+print(f"Signed in as {address}. Saved {ACCOUNTS[account]} to .env")

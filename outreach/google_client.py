@@ -6,22 +6,31 @@ from googleapiclient.discovery import build
 
 from outreach import config
 
-SCOPES = [
+GMAIL_SCOPES = [
     "https://www.googleapis.com/auth/gmail.send",
     "https://www.googleapis.com/auth/gmail.readonly",  # reading threads for reply detection
-    "https://www.googleapis.com/auth/spreadsheets",
 ]
+SCOPES = GMAIL_SCOPES + ["https://www.googleapis.com/auth/spreadsheets"]
 TOKEN_URI = "https://oauth2.googleapis.com/token"
 
+# Sending accounts. "gmail" also owns the sheet; others only send and read their own threads.
+ACCOUNTS = {"gmail": "GOOGLE_REFRESH_TOKEN", "umich": "GOOGLE_REFRESH_TOKEN_UMICH"}
 
-def credentials():
+
+def scopes_for(account):
+    return SCOPES if account == "gmail" else GMAIL_SCOPES
+
+
+def credentials(account="gmail"):
+    if account not in ACCOUNTS:
+        raise SystemExit(f"Unknown account '{account}'. Use one of: {', '.join(ACCOUNTS)}")
     creds = Credentials(
         token=None,
-        refresh_token=config.require("GOOGLE_REFRESH_TOKEN"),
+        refresh_token=config.require(ACCOUNTS[account]),
         client_id=config.require("GOOGLE_CLIENT_ID"),
         client_secret=config.require("GOOGLE_CLIENT_SECRET"),
         token_uri=TOKEN_URI,
-        scopes=SCOPES,
+        scopes=scopes_for(account),
     )
     creds.refresh(Request())
     return creds
