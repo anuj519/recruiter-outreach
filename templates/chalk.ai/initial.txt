@@ -1,4 +1,4 @@
-Subject: Interested in new grad roles at {company}
+Subject: Interested in new grad SWE at {company}
 
 Hi {first_name},
 
