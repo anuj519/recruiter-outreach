@@ -1,4 +1,4 @@
-Subject: Interested in Summer 2027 internships at {company}
+Subject: Interested in 2027 SWE internship at {company}
 
 Hi {first_name},
 
