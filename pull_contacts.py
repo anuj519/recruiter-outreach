@@ -23,7 +23,7 @@ from outreach.store import Sheet, timestamp
 def title_rank(title):
     """Front-line and university recruiters answer cold email more than recruiting leadership."""
     title = title.lower()
-    if any(w in title for w in ("university", "campus", "early career", "emerging talent")):
+    if any(w in title for w in ("university", "campus", "early career", "early talent", "emerging talent", "new grad", "internship")):
         return 0
     if any(w in title for w in ("director", "head", "vp", "vice president", "chief", "manager", "operations")):
         return 2
@@ -37,8 +37,16 @@ def this_weeks_title():
 
 
 def find_with_hunter(domain, want, seen_emails):
-    people = [p for p in hunter.search_recruiters(domain, this_weeks_title()) if p["email"] not in seen_emails]
-    people.sort(key=lambda p: (p["email_status"] != "verified", title_rank(p["title"])))
+    """Early-career recruiters first; the weekly rotating title only fills remaining slots."""
+    found = {}
+    for title in (hunter.EARLY_CAREER_TITLES, this_weeks_title()):
+        for p in hunter.search_recruiters(domain, title):
+            if p["email"] not in seen_emails:
+                found.setdefault(p["email"], p)
+        verified = sum(p["email_status"] == "verified" for p in found.values())
+        if verified >= want:
+            break
+    people = sorted(found.values(), key=lambda p: (p["email_status"] != "verified", title_rank(p["title"])))
     return people[:want]
 
 

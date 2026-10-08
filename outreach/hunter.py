@@ -7,7 +7,7 @@ import requests
 from outreach import config
 
 DOMAIN_SEARCH_URL = "https://api.hunter.io/v2/domain-search"
-RECRUITER_WORDS = ("recruit", "talent", "sourcer", "sourcing", "university", "campus", "hiring")
+RECRUITER_WORDS = ("recruit", "talent", "sourcer", "sourcing", "university", "campus", "hiring", "early career")
 
 
 class HunterError(Exception):
@@ -17,6 +17,9 @@ class HunterError(Exception):
 # The Free plan only returns the top 10 matches, so pull_contacts rotates through these weekly
 # to surface different people.
 SEARCH_TITLES = ["recruiter", "university recruiter", "talent acquisition", "technical recruiter", "campus recruiter"]
+
+# Searched first every run. Comma-separated titles are OR'd; a search with no matches costs nothing.
+EARLY_CAREER_TITLES = "early career,early talent,university recruiter,campus recruiter"
 
 
 def search_recruiters(domain, job_title="recruiter"):
