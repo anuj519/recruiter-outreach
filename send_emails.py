@@ -9,14 +9,14 @@ from datetime import datetime, timedelta, timezone
 from email.utils import formataddr
 
 from outreach import config, mailer, templates
-from outreach.google_client import credentials, gmail_service, sheets_service
+from outreach.google_client import credentials, fresh_http, gmail_service, sheets_service
 from outreach.lock import run_lock
 from outreach.store import Sheet, timestamp
 
 
 class Outbox:
-    def __init__(self, gmail, sheet, sender, dry):
-        self.gmail, self.sheet, self.sender, self.dry = gmail, sheet, sender, dry
+    def __init__(self, gmail, sheet, sender, dry, creds=None):
+        self.gmail, self.sheet, self.sender, self.dry, self.creds = gmail, sheet, sender, dry, creds
         self.sent = 0
 
     def send(self, row, subject, body, **threading):
@@ -26,7 +26,8 @@ class Outbox:
             return None
         if self.sent:
             time.sleep(config.SEND_DELAY_SECONDS * random.uniform(0.75, 1.25))
-        result = mailer.send(self.gmail, sender=self.sender, to=row["email"], subject=subject, body=body, **threading)
+        http = fresh_http(self.creds) if self.creds else None
+        result = mailer.send(self.gmail, sender=self.sender, to=row["email"], subject=subject, body=body, http=http, **threading)
         self.sent += 1
         print("    sent")
         return result
@@ -121,7 +122,7 @@ def main():
     gmail = gmail_service(creds)
     sheet = Sheet(sheets_service(creds), config.require("SHEET_ID"))
     me = mailer.my_address(gmail)
-    outbox = Outbox(gmail, sheet, formataddr((config.require("SENDER_NAME"), me)), dry)
+    outbox = Outbox(gmail, sheet, formataddr((config.require("SENDER_NAME"), me)), dry, creds)
 
     contacts = sheet.contacts()
     first_lines = {c["domain"]: c["first_line"] for c in sheet.companies()}

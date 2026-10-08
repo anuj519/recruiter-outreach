@@ -25,7 +25,7 @@ def my_address(gmail):
     return gmail.users().getProfile(userId="me").execute(num_retries=3)["emailAddress"]
 
 
-def send(gmail, *, sender, to, subject, body, thread_id=None, in_reply_to=None, references=None):
+def send(gmail, *, sender, to, subject, body, thread_id=None, in_reply_to=None, references=None, http=None):
     msg = EmailMessage()
     msg["From"] = sender
     msg["To"] = to
@@ -38,7 +38,7 @@ def send(gmail, *, sender, to, subject, body, thread_id=None, in_reply_to=None, 
     payload = {"raw": base64.urlsafe_b64encode(msg.as_bytes()).decode()}
     if thread_id:
         payload["threadId"] = thread_id
-    return gmail.users().messages().send(userId="me", body=payload).execute()
+    return gmail.users().messages().send(userId="me", body=payload).execute(http=http)
 
 
 def check_thread(gmail, thread_id, me):

@@ -1,4 +1,6 @@
+import httplib2
 from google.auth.transport.requests import Request
+from google_auth_httplib2 import AuthorizedHttp
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
@@ -23,6 +25,11 @@ def credentials():
     )
     creds.refresh(Request())
     return creds
+
+
+def fresh_http(creds):
+    """A new connection. Reusing one across the pause between sends gets it reset by Google."""
+    return AuthorizedHttp(creds, http=httplib2.Http(timeout=60))
 
 
 def gmail_service(creds):
