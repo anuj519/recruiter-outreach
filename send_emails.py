@@ -120,6 +120,9 @@ def handle_follow_ups(outbox, contacts):
 def handle_new(outbox, contacts, first_lines):
     approved = [r for r in contacts if r["status"] == "approved"]
     for row in approved[: config.DAILY_NEW_LIMIT]:
+        if not row["first_name"]:
+            print(f"Skipping {row['email']}: no first_name in the sheet.")
+            continue
         try:
             outbox.mailbox(row)
         except RuntimeError as e:
