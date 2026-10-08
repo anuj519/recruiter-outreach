@@ -103,7 +103,7 @@ def handle_follow_ups(outbox, contacts):
             outbox.save(row, status="done")
             continue
 
-        _, body = templates.render(f"followup_{count + 1}.txt", row["domain"], **fields(row))
+        _, body = templates.render(f"followup_{count + 1}.txt", row["domain"], row.get("template", ""), **fields(row))
         try:
             outbox.send(
                 row, f"Re: {row['subject']}", body,
@@ -125,7 +125,7 @@ def handle_new(outbox, contacts, first_lines):
         except RuntimeError as e:
             print(f"Skipping {row['email']}: {e}")
             continue
-        subject, body = templates.render("initial.txt", row["domain"], **fields(row, first_lines.get(row["domain"], "")))
+        subject, body = templates.render("initial.txt", row["domain"], row.get("template", ""), **fields(row, first_lines.get(row["domain"], "")))
         try:
             result = outbox.send(row, subject, body)
         except Exception as e:

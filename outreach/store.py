@@ -17,6 +17,7 @@ CONTACT_COLUMNS = [
     "linkedin_url", "apollo_id", "status", "added_at", "last_contacted",
     "follow_up_count", "thread_id", "subject", "notes",
     "account",  # sending account: blank = gmail, or "umich"
+    "template",  # template variant folder, e.g. "alumni"; blank = company/default
 ]
 
 
