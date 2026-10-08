@@ -1,6 +1,7 @@
 """Gmail sending and reply detection."""
 
 import base64
+import html
 from dataclasses import dataclass
 from email.message import EmailMessage
 from email.utils import parseaddr
@@ -21,6 +22,11 @@ class ThreadState:
     references: str
 
 
+def to_html(body):
+    """Plain text to the same minimal HTML Gmail's composer produces."""
+    return f'<div dir="ltr">{html.escape(body.strip()).replace(chr(10), "<br>")}</div>'
+
+
 def my_address(gmail):
     return gmail.users().getProfile(userId="me").execute(num_retries=3)["emailAddress"]
 
@@ -34,6 +40,8 @@ def send(gmail, *, sender, to, subject, body, thread_id=None, in_reply_to=None, 
         msg["In-Reply-To"] = in_reply_to
         msg["References"] = f"{references or ''} {in_reply_to}".strip()
     msg.set_content(body)
+    # HTML alternative: some providers (U-M) hard-wrap plain text at ~70 chars, which reads choppy.
+    msg.add_alternative(to_html(body), subtype="html")
 
     payload = {"raw": base64.urlsafe_b64encode(msg.as_bytes()).decode()}
     if thread_id:
