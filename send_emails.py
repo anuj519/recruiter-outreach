@@ -11,6 +11,7 @@ from email.utils import formataddr
 from outreach import config, mailer, templates
 from outreach.google_client import credentials, fresh_http, gmail_service, sheets_service
 from outreach.lock import run_lock
+from outreach.network import wait_for_network
 from outreach.store import Sheet, timestamp
 
 
@@ -168,5 +169,6 @@ def main():
 
 
 if __name__ == "__main__":
+    wait_for_network()
     with run_lock():
         main()

@@ -17,6 +17,7 @@ from outreach import apollo, config, hunter
 from outreach.filters import has_ai_trap
 from outreach.google_client import credentials, sheets_service
 from outreach.lock import run_lock
+from outreach.network import wait_for_network
 from outreach.store import Sheet, timestamp
 
 
@@ -92,10 +93,14 @@ def main():
         if want <= 0:
             continue
 
-        if use_hunter:
-            people = find_with_hunter(domain, want, seen_emails)
-        else:
-            people = find_with_apollo(domain, want, seen_ids, dry)
+        try:
+            if use_hunter:
+                people = find_with_hunter(domain, want, seen_emails)
+            else:
+                people = find_with_apollo(domain, want, seen_ids, dry)
+        except Exception as e:
+            print(f"{domain}: search failed ({e.__class__.__name__}), skipping this company this run")
+            continue
         budget -= len(people)
 
         rows = []
@@ -137,5 +142,6 @@ def main():
 
 
 if __name__ == "__main__":
+    wait_for_network()
     with run_lock():
         main()
