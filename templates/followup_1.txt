@@ -1,6 +1,6 @@
 Hi {first_name},
 
-Bumping this in case it got buried. I'm still very interested in a Summer 2027 internship at {company} and would appreciate any pointers.
+Following up on my note about early-career engineering opportunities at {company}. I'd appreciate any guidance on the best recruiting contact for robotics software, embedded systems, or autonomy roles.
 
-Thanks,
+Thanks again,
 {sender_name}
