@@ -1,0 +1,12 @@
+Subject: Robotics software opportunities at {company}
+
+Hi {first_name},
+
+I'm a senior in Robotics at the University of Michigan (May 2027 graduation), and I'm especially interested in hands-on software roles that bridge autonomy algorithms with real hardware.
+
+I've worked on ADAS validation and HIL automation at GM and currently develop C++/ROS 2 components for mobile-robot SLAM and navigation. {first_line}
+
+I know teams at smaller companies often hire outside formal new-grad pipelines. Would it be appropriate to share my resume or ask a brief question about your team's upcoming software needs?
+
+Best,
+{sender_name}

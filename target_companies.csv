@@ -1,0 +1,11 @@
+company,domain,priority,role_focus,application_status,notes
+Rocket Lab,,high,flight software / embedded,,Verify company domain before adding to Companies tab
+Northwood Space,,high,embedded systems / software,,Verify company domain
+K2 Space,,high,flight software / embedded,applied,Check for existing recruiter contacts
+Mach Industries,,high,software / GNC,applied,Use applied template only if specific role was applied to
+Blue Origin,,medium,flight software / autonomy,applied,Reference university event only when relevant
+Moby Robotics,,medium,robotics software,,Existing warm contact: prioritize direct outreach
+Applied Intuition,,hold,autonomy / robotics,active conversation,Do not automate outreach during recruiter conversation
+SpaceX,,medium,flight software / embedded,,Use highly tailored manual outreach
+True Anomaly,,medium,embedded / autonomy,applied,Verify specific role
+Stoke Space,,medium,controls / test,applied,Verify specific role

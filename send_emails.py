@@ -148,6 +148,10 @@ def handle_new(outbox, contacts, first_lines):
 
 def main():
     dry = config.DRY_RUN
+    if not dry:
+        import os
+        if os.getenv("LIVE_SEND_CONFIRM") != "I_REVIEWED_CONTACTS":
+            raise SystemExit("Live sending blocked. Set LIVE_SEND_CONFIRM=I_REVIEWED_CONTACTS only after reviewing recipients and templates.")
     unfinished = templates.unfinished()
     if unfinished:
         if not dry:

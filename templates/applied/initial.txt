@@ -1,0 +1,12 @@
+Subject: Following up on my application to {company}
+
+Hi {first_name},
+
+I'm a Robotics senior at the University of Michigan graduating in May 2027. I recently applied to an engineering role at {company} and wanted to express my interest directly.
+
+My background includes ADAS validation and HIL automation at GM, plus C++/ROS 2 work on mobile-robot SLAM and navigation. {first_line}
+
+If you work with early-career robotics, embedded software, or autonomy candidates, I'd be grateful for any advice on the application process or the appropriate contact. I'm happy to send my resume and the specific posting.
+
+Best,
+{sender_name}
