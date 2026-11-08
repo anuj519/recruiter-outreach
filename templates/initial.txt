@@ -1,12 +1,14 @@
-Subject: Interested in 2027 SWE internship at {company}
+Subject: UMich robotics graduate interested in {company}
 
 Hi {first_name},
 
-I hope you're having a great day!
+I'm a senior studying Robotics at the University of Michigan with a CS minor, graduating in May 2027. I'm interested in early-career robotics software, embedded software, and autonomy opportunities at {company}.
 
-For a brief background, my name is Nathan Done, and I'm a Computer Science student at the University of Michigan. I previously interned as a software engineer at Etsy and am currently interning at Amazon. I'm interested in Summer 2027 internship positions at {company}, and I thought it would be a good idea to reach out to hear about your time at the company and soak up some knowledge.
+My experience includes ADAS validation and hardware-in-the-loop automation at General Motors, along with C++/ROS 2 development on a mobile-robot SLAM and navigation project.
 
-If you have any availability in the coming days, I'd love the opportunity to schedule a brief 15-30 minute call to chat. I understand you may be busy, and I'd be more than happy to work around your availability.
+{first_line}
 
-Best,
+Are you the right person to speak with about early-career engineering openings, or is there someone on your team you'd recommend I contact? I'm happy to share my resume.
+
+Thanks for your time,
 {sender_name}
