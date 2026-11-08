@@ -19,13 +19,13 @@ def require(name):
 # Dry run is on unless explicitly turned off, so nothing sends by accident.
 DRY_RUN = os.getenv("DRY_RUN", "true").strip().lower() != "false"
 
-DAILY_NEW_LIMIT = _int("DAILY_NEW_LIMIT", 20)
+DAILY_NEW_LIMIT = min(_int("DAILY_NEW_LIMIT", 5), 5)
 MAX_FOLLOW_UPS = min(_int("MAX_FOLLOW_UPS", 1), 1)  # one follow-up, then stop
 FOLLOW_UP_DAYS = float(os.getenv("FOLLOW_UP_DAYS") or 7)  # fractions allowed, e.g. 1.5
 SEND_DELAY_SECONDS = _int("SEND_DELAY_SECONDS", 30)
 
 # When true, verified contacts are added as "approved" and get emailed without a manual review.
-AUTO_APPROVE = os.getenv("AUTO_APPROVE", "false").strip().lower() == "true"
+AUTO_APPROVE = False  # require review of every contact
 
 MAX_ENRICH_PER_RUN = _int("MAX_ENRICH_PER_RUN", 20)  # contacts added per pull, at most
 MAX_PER_COMPANY = _int("MAX_PER_COMPANY", 3)
